@@ -1,13 +1,14 @@
 import sys
 import cmath
+from math import sqrt
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QComboBox, QStyleFactory, QApplication,
+    QWidget, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QComboBox, QStyleFactory, QApplication, QMessageBox, QPlainTextEdit, 
 )
 from PyQt6.QtGui import QDoubleValidator, QFont
 from PyQt6.QtCore import Qt
 
 import pyqtgraph as pg
-
+import sympy
 
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
@@ -48,6 +49,11 @@ class MainWindow(QWidget):
         button.clicked.connect(self.get_values)
         layout.addWidget(button)
 
+        # Button to show steps to answer
+        button = QPushButton("Steps to Answer")
+        button.clicked.connect(self.steps_to_answer)
+        layout.addWidget(button)
+        
         # QLabel to display the roots
         self.display_result1_label = QLabel()
         self.display_result1_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -55,7 +61,35 @@ class MainWindow(QWidget):
         self.display_result2_label = QLabel()
         self.display_result2_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.display_result2_label)
+        
+        #Steps to answer
+        #Quadratic Equation
+        # a_symbol, b_symbol, c_symbol, x_symbol = sympy.symbols(('a', 'b', 'c', 'x'))
+        # quadratic_equation = sympy.Eq(a_symbol*x_symbol**2+b_symbol*x_symbol+c_symbol, 0)
+        
+        # quadratic_equation = sympy.latex(quadratic_equation)
+        # self.quadratic_equation = "ax^2 + bx + x"
+        # self.Quadratic_Equation = QLabel(self.quadratic_equation)
+        
+        # STEPS FOR ANSWER
+        self.Quadratic_Equation_label = QLabel() # Quadratic EQUATION
+        self.Quadratic_Equation_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.Quadratic_Equation_label)
+        
+        self.quadratic_equation_with_values = QLabel() #Substituting Values in quadrtic Equation
+        self.quadratic_equation_with_values.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.quadratic_equation_with_values)
+        
+        self.quadratic_Formula = QLabel() #Displaying Quadratic Formula
+        self.quadratic_Formula.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.quadratic_Formula)
+        
+        self.quadratic_Formula_with_values = QLabel() #substituting Values in Quadratic Formula
+        self.quadratic_Formula_with_values.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.quadratic_Formula_with_values)
 
+        
+        # result display
         font = QFont("Arial", 11)
         self.display_result1_label.setFont(font)
         self.display_result2_label.setFont(font)
@@ -84,7 +118,7 @@ class MainWindow(QWidget):
         self.show()
 
     ######################  LOGIC  #########################
-
+    ##### Show Answers ########
     def get_values(self):
         a_text = self.a_line_edit.text()
         b_text = self.b_line_edit.text()
@@ -95,22 +129,26 @@ class MainWindow(QWidget):
             if not a_text or not b_text or not c_text:
                 raise ValueError("Values not entered")
 
+            global a,b,c
+            
             a = float(a_text)
             b = float(b_text)
             c = float(c_text)
 
             if a == 0:
                 raise ValueError("'a' cannot be zero")
-
+        
             # Calculate roots
             discriminant = (b * b) - (4 * a * c)
+            global sol1, sol2
             sol1 = str((-b - cmath.sqrt(discriminant)) / (2 * a))
             sol2 = str((-b + cmath.sqrt(discriminant)) / (2 * a))
             sol1 = sol1.replace("(", "").replace(")", "").replace("j", " i")
             sol2 = sol2.replace("(", "").replace(")", "").replace("j", " i")
-            self.display_result1_label.setText(f"Root 1: {sol1}")
-            self.display_result2_label.setText(f"Root 2: {sol2}")
+            self.display_result1_label.setText(f"Root 1: {sol1}") # Display Root 1
+            self.display_result2_label.setText(f"Root 2: {sol2}") # Display Root 2
             
+            # Graph
             x_values = [i for i in range(-50, 51)]
             y_values = [(a * (xi ** 2) + b * xi + c)for xi in x_values]
             self.plot_widget.clear()
@@ -135,6 +173,37 @@ class MainWindow(QWidget):
             # Handle other exceptions
             self.display_result1_label.setText("An error occurred")
             print(f"Error: {e}")
+
+    ######## Steps to answers ########
+    
+    def steps_to_answer(self):
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Pop-up Window")
+        
+        # Set multiple lines of detailed text
+        detailed_text = "ax^2 + bx + c\n"
+        detailed_text += f"{a}x^2 + {b}x + {c}\n"
+        detailed_text += "-b ± sqrt(b^2 - 4ac) / 2a\n"
+        detailed_text += f"-{b} ± sqrt({b}^2 - 4*{a}*{c}) / 2*{a}\n"
+        detailed_text += f"{sol1}"
+        detailed_text += f"{sol2}"
+        
+        msg_box.setText(detailed_text)
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        
+        # Add buttons to the pop-up
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        
+        # Set the default button to Ok
+        msg_box.setDefaultButton(QMessageBox.StandardButton.Ok)
+        
+        # Display the pop-up
+        msg_box.exec()
+            
+        # self.Quadratic_Equation_label.setText("ax^2 + bx + c") # Displaying Quadratic Equation
+        # # self.quadratic_equation_with_values.setText(f"{a}x^2 + {b}x + {c}") # Substituting Values into Quadratic Equation
+        # self.quadratic_Formula.setText("-b +- sqrt(b^2 - 4*a*c) / 2a")
+        # self.quadratic_Formula_with_values.setText(f"-{b} +- sqrt({b}^2 - 4*{a}*{c}) / 2*{a}")
 
     ######################  THEME #########################
 

@@ -1,6 +1,5 @@
 import sys
 import cmath
-from math import sqrt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QComboBox, QStyleFactory, QApplication, QMessageBox, QPlainTextEdit, 
 )
@@ -8,7 +7,6 @@ from PyQt6.QtGui import QDoubleValidator, QFont
 from PyQt6.QtCore import Qt
 
 import pyqtgraph as pg
-import sympy
 
 class MainWindow(QWidget):
     def __init__(self, *args, **kwargs):
@@ -62,33 +60,6 @@ class MainWindow(QWidget):
         self.display_result2_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.display_result2_label)
         
-        #Steps to answer
-        #Quadratic Equation
-        # a_symbol, b_symbol, c_symbol, x_symbol = sympy.symbols(('a', 'b', 'c', 'x'))
-        # quadratic_equation = sympy.Eq(a_symbol*x_symbol**2+b_symbol*x_symbol+c_symbol, 0)
-        
-        # quadratic_equation = sympy.latex(quadratic_equation)
-        # self.quadratic_equation = "ax^2 + bx + x"
-        # self.Quadratic_Equation = QLabel(self.quadratic_equation)
-        
-        # STEPS FOR ANSWER
-        self.Quadratic_Equation_label = QLabel() # Quadratic EQUATION
-        self.Quadratic_Equation_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.Quadratic_Equation_label)
-        
-        self.quadratic_equation_with_values = QLabel() #Substituting Values in quadrtic Equation
-        self.quadratic_equation_with_values.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.quadratic_equation_with_values)
-        
-        self.quadratic_Formula = QLabel() #Displaying Quadratic Formula
-        self.quadratic_Formula.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.quadratic_Formula)
-        
-        self.quadratic_Formula_with_values = QLabel() #substituting Values in Quadratic Formula
-        self.quadratic_Formula_with_values.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.quadratic_Formula_with_values)
-
-        
         # result display
         font = QFont("Arial", 11)
         self.display_result1_label.setFont(font)
@@ -98,6 +69,7 @@ class MainWindow(QWidget):
         theme_combo_box = QComboBox()
         theme_combo_box.addItem("Light Theme")
         theme_combo_box.addItem("Dark Theme")
+        theme_combo_box.addItem("Sepia Theme")
         theme_combo_box.currentIndexChanged.connect(self.change_theme)
         layout.addWidget(theme_combo_box)
 
@@ -185,8 +157,8 @@ class MainWindow(QWidget):
         detailed_text += f"{a}x^2 + {b}x + {c}\n"
         detailed_text += "-b ± sqrt(b^2 - 4ac) / 2a\n"
         detailed_text += f"-{b} ± sqrt({b}^2 - 4*{a}*{c}) / 2*{a}\n"
-        detailed_text += f"{sol1}"
-        detailed_text += f"{sol2}"
+        detailed_text += f"Result 1: {sol1}\n"
+        detailed_text += f"Result 2:{sol2}"
         
         msg_box.setText(detailed_text)
         msg_box.setIcon(QMessageBox.Icon.Information)
@@ -199,11 +171,7 @@ class MainWindow(QWidget):
         
         # Display the pop-up
         msg_box.exec()
-            
-        # self.Quadratic_Equation_label.setText("ax^2 + bx + c") # Displaying Quadratic Equation
-        # # self.quadratic_equation_with_values.setText(f"{a}x^2 + {b}x + {c}") # Substituting Values into Quadratic Equation
-        # self.quadratic_Formula.setText("-b +- sqrt(b^2 - 4*a*c) / 2a")
-        # self.quadratic_Formula_with_values.setText(f"-{b} +- sqrt({b}^2 - 4*{a}*{c}) / 2*{a}")
+        
 
     ######################  THEME #########################
 
@@ -226,6 +194,16 @@ class MainWindow(QWidget):
             self.plot_widget.setBackground("k")
             self.plot_widget.getAxis("bottom").setPen(pg.mkPen(color="#FFFFFF"))  # Set the bottom axis color to white
             self.plot_widget.getAxis("left").setPen(pg.mkPen(color="#FFFFFF"))  # Set the left axis color to white
+            self.plot_widget.getAxis("bottom").setStyle(tickTextOffset=10)  # Adjust the tick text offset
+            
+        elif index == 2:
+            # Apply sepia theme
+            self.setStyleSheet("background-color: #F5DEB3; color: #704214;")
+            self.plot_widget.plotItem.showGrid(True, True, 0.7)  # grid colour and transparency
+            # Set the graph's background color to sepia
+            self.plot_widget.setBackground("#D2B48C")
+            self.plot_widget.getAxis("bottom").setPen(pg.mkPen(color="#704214"))  # Set the bottom      axis color to a dark brown
+            self.plot_widget.getAxis("left").setPen(pg.mkPen(color="#704214"))  # Set the left axis         color to a dark brown
             self.plot_widget.getAxis("bottom").setStyle(tickTextOffset=10)  # Adjust the tick text offset
 
     ######################  STYLE #########################
